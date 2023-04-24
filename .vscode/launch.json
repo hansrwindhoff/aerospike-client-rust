@@ -1,0 +1,158 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'benchmark'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=benchmark",
+                    "--package=aerospike-client-rust-benchmark"
+                ],
+                "filter": {
+                    "name": "benchmark",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'benchmark'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=benchmark",
+                    "--package=aerospike-client-rust-benchmark"
+                ],
+                "filter": {
+                    "name": "benchmark",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'aerospike'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=aerospike"
+                ],
+                "filter": {
+                    "name": "aerospike",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'trialapp'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=trialapp",
+                    "--package=aerospike"
+                ],
+                "filter": {
+                    "name": "trialapp",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'trialapp'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=trialapp",
+                    "--package=aerospike"
+                ],
+                "filter": {
+                    "name": "trialapp",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug integration test 'client'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--test=client",
+                    "--package=aerospike"
+                ],
+                "filter": {
+                    "name": "client",
+                    "kind": "test"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug integration test 'lib'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--test=lib",
+                    "--package=aerospike"
+                ],
+                "filter": {
+                    "name": "lib",
+                    "kind": "test"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug benchmark 'client_server'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bench=client_server",
+                    "--package=aerospike"
+                ],
+                "filter": {
+                    "name": "client_server",
+                    "kind": "bench"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
