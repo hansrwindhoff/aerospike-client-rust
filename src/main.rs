@@ -102,12 +102,13 @@ fn main() {
                         // println!("r:  {:#?}", record.bins);
                         let key_names = record.bins.keys().sorted();
                         if idx == 0 {
-                            // match wtr.write_record(key_names.clone()) {
-                            //     Err(_err) => {
-                            //         panic!("failed to write headers")
-                            //     }
-                            //     Ok(_) => (),
-                            // };
+                            println!("key_names:  {}", key_names.clone().join(","));
+                            match wtr.write_record(key_names.clone()) {
+                                Err(_err) => {
+                                    panic!("failed to write headers")
+                                }
+                                Ok(_) => (),
+                            };
                         }
                         let vals = key_names.map(|k| {
                             let val = record.bins.get(k);
@@ -115,27 +116,36 @@ fn main() {
                                 Some(v) => {
                                     count += 1;
                                     if let Value::Int(int) = v {
-                                        println!("int {:?}", int);
-                                    } else if let Value::Float(dbl) = v {
-                                        println!("float {:?}", dbl);
+                                        // println!("int {:?}", int);
+                                        int.to_string().clone()
+                                    } else if let Value::Float(floaat) = v {
+                                        // println!("float {:?}", floaat);
+                                        floaat.to_string().clone()
                                     } else if let Value::Bool(bool) = v {
-                                        println!("bool {:?}", bool);
+                                        // println!("bool {:?}", bool);
+                                        bool.to_string().clone()
                                     } else if let Value::GeoJSON(geojson) = v {
-                                        println!("geojson {:?}", geojson);
+                                        // println!("geojson {:?}", geojson);
+                                        geojson.to_string().clone()
                                     } else if let Value::List(vec) = v {
-                                        println!("list [{}]", vec.iter().map(|v| v).join(","));
+                                        let temp = vec.iter().map(|v| v).join(",");
+                                        // println!("list [{}]", temp);
+                                        temp.to_string().clone()
                                     } else if let Value::String(strg) = v {
-                                        println!("string {}", strg);
+                                        // println!("string {}", strg);
+                                        strg.to_string().clone()
+                                    } else {
+                                        "".to_string().clone()
                                     }
-
-                                    v.as_string()
+                                    
                                 }
-                                None => "".to_string(),
+                                None => "".to_string().clone(),
                             }
                         });
-                        let strg_vals = vals.map(|v| v);
+                        let strg_vals = vals.into_iter().collect::<Vec<String>>().join( ",");
+                        // println!(" wtf {:?}", strg_vals);
 
-                        match wtr.write_record(strg_vals) {
+                        match wtr.write_field(strg_vals) {
                             Err(_err) => {
                                 panic!("failed to write row")
                             }
