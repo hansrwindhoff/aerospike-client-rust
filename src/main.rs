@@ -1,15 +1,15 @@
 // #[macro_use]
 extern crate aerospike;
-use aerospike::Value;
+// use aerospike::Value;
 use itertools::Itertools;
-use serde_json::Result;
-use std::any::Any;
+use serde_json::value;
+// use serde_json::Result;
+// use std::any::Any;
 use std::env;
 use std::io;
-use std::time::Instant;
+// use std::time::Instant;
 
 use aerospike::{
-    // Bins,
     Client,
     ClientPolicy,
     // QueryPolicy,
@@ -17,6 +17,8 @@ use aerospike::{
     // WritePolicy
     // ReadPolicy,
     // Statement,
+    // Bins,
+    Value,
 };
 // use aerospike::operations;
 
@@ -25,10 +27,11 @@ fn main() {
 
     let cpolicy = ClientPolicy::default();
     // let hosts = env::var("AEROSPIKE_HOSTS").unwrap_or(String::from("0.0.0.0:3000"));
-    let hosts = env::var("AEROSPIKE_HOSTS").unwrap_or(String::from("aerospk1.dca1.lijit.com:3000"));
+    // let hosts = env::var("AEROSPIKE_HOSTS").unwrap_or(String::from("aerospk1.dca1.lijit.com:3000"));
+    let hosts = env::var("AEROSPIKE_HOSTS").unwrap_or(String::from("0.0.0.0:3000"));
     let client = Client::new(&cpolicy, &hosts).expect("Failed to connect to cluster");
 
-    let now = Instant::now();
+    // let now = Instant::now();
     // let rpolicy = ReadPolicy::default();
     // // let wpolicy = WritePolicy::default();
     // let key = as_key!("test", "test", "test");
@@ -66,19 +69,21 @@ fn main() {
     //     Err(err) => println!("Error fetching record: {}", err),
     // }
 
-    let mut pol = ScanPolicy::default();
+    let pol = ScanPolicy::default();
     // pol.max_concurrent_nodes = 6;
 
     match client.scan(
         &pol,
-        "addelivery",
-        "publisher_domain_block",
+        "test",
+        "demo",
+        // "addelivery",
+        // "publisher_domain_block",
         ["publisher_id", "domain", "battr", "bcat", "badv"],
     ) {
         //Bins::All
         // match client.scan(&pol, "test", "scala_input_data", Bins::All) {
         Ok(records) => {
-            // let mut count = 0;
+            let mut count = 0;
 
             // records.for_each(
             //     |r|{
@@ -90,42 +95,66 @@ fn main() {
 
             //      })
 
-            for (idx, record) in records.enumerate() {
+            for (idx, record) in records.take(5).enumerate() {
                 match record {
                     Ok(record) => {
                         // println!("r:  {:#?}", record.bins);
-                        let new_map = record.bins.keys().sorted();
+                        let key_names = record.bins.keys().sorted();
                         if idx == 0 {
-                            match wtr.write_record(new_map.clone()){
-                                Err(_err)=>{panic!("failed to write headers")}
+                            match wtr.write_record(key_names.clone()) {
+                                Err(_err) => {
+                                    panic!("failed to write headers")
+                                }
                                 Ok(_) => (),
                             };
                         }
-                        let vals = new_map.map(|k| {
+                        let vals = key_names.map(|k| {
+                            
                             let val = record.bins.get(k);
                             match val {
                                 Some(v) => {
-                                    // println!("{:?}", v.type_id());
+                                    count += 1;
+                                    if let Value::Int(int) = v {
+                                        println!("int {:?}", int);
+                                    } else if let Value::Float(dbl) = v {
+                                        println!("float {:?}", dbl);
+                                    } else if let Value::Bool(bool) = v {
+                                        println!("bool {:?}", bool);
+                                    } else if let Value::GeoJSON(geojson) = v {
+                                        println!("geojson {:?}", geojson);
+                                    } else if let Value::List(vec) = v {
+                                        println!(
+                                            "list {:?}",
+                                            vec.iter().map(|v| v).join("!")
+                                        );
+                                    } else if let Value::String(strg) = v {
+                                        println!("string {:?}", strg);
+                                    }
+
                                     v.as_string()
-                                },
+                                }
                                 None => "".to_string(),
                             }
                         });
                         let strg_vals = vals.map(|v| v);
 
-                        
-                        match wtr.write_record(strg_vals){
-                            Err(_err)=>{panic!("failed to write row")}
+                        match wtr.write_record(strg_vals) {
+                            Err(_err) => {
+                                panic!("failed to write row")
+                            }
                             Ok(_) => (),
                         };
 
-                        // count += 1
+                        // println!(" wtf {:?}", vals);
+                        // println!(" wtf2 {:?} end wtf2 ", vals.into_iter().map(|v|  v));
+                        // println!(" wtf3 {:?}", vals.into_iter().map(|v|  v));
+                        // let strg_vals = vals.map(|v| v);
                     }
                     Err(err) => panic!("Error executing scan: {}", err),
                 }
             }
             // wtr.write_record(&(records.take(10)));
-            // println!("Records: {}", count);
+            println!("Records: {}", count);
         }
         Err(err) => println!("Failed to execute scan: {}", err),
     }
