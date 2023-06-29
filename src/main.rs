@@ -26,9 +26,11 @@ fn main() {
     let mut wtr = csv::Writer::from_writer(io::stdout());
 
     let cpolicy = ClientPolicy::default();
-    // let hosts = env::var("AEROSPIKE_HOSTS").unwrap_or(String::from("0.0.0.0:3000"));
-    // let hosts = env::var("AEROSPIKE_HOSTS").unwrap_or(String::from("aerospk1.dca1.lijit.com:3000"));
+
     let hosts = env::var("AEROSPIKE_HOSTS").unwrap_or(String::from("0.0.0.0:3000"));
+    // let hosts = env::var("AEROSPIKE_HOSTS").unwrap_or(String::from("aerospk1.dca1.lijit.com:3000"));
+    // let hosts = env::var("AEROSPIKE_HOSTS").unwrap_or(String::from("0.0.0.0:3000"));
+
     let client = Client::new(&cpolicy, &hosts).expect("Failed to connect to cluster");
 
     // let now = Instant::now();
@@ -69,8 +71,8 @@ fn main() {
     //     Err(err) => println!("Error fetching record: {}", err),
     // }
 
-    let pol = ScanPolicy::default();
-    // pol.max_concurrent_nodes = 6;
+    let mut pol = ScanPolicy::default();
+    pol.max_concurrent_nodes = 2;
 
     match client.scan(
         &pol,
@@ -81,7 +83,6 @@ fn main() {
         ["publisher_id", "domain", "battr", "bcat", "badv"],
     ) {
         //Bins::All
-        // match client.scan(&pol, "test", "scala_input_data", Bins::All) {
         Ok(records) => {
             let mut count = 0;
 
@@ -95,21 +96,20 @@ fn main() {
 
             //      })
 
-            for (idx, record) in records.take(5).enumerate() {
+            for (idx, record) in records.take(50).enumerate() {
                 match record {
                     Ok(record) => {
                         // println!("r:  {:#?}", record.bins);
                         let key_names = record.bins.keys().sorted();
                         if idx == 0 {
-                            match wtr.write_record(key_names.clone()) {
-                                Err(_err) => {
-                                    panic!("failed to write headers")
-                                }
-                                Ok(_) => (),
-                            };
+                            // match wtr.write_record(key_names.clone()) {
+                            //     Err(_err) => {
+                            //         panic!("failed to write headers")
+                            //     }
+                            //     Ok(_) => (),
+                            // };
                         }
                         let vals = key_names.map(|k| {
-                            
                             let val = record.bins.get(k);
                             match val {
                                 Some(v) => {
@@ -123,12 +123,9 @@ fn main() {
                                     } else if let Value::GeoJSON(geojson) = v {
                                         println!("geojson {:?}", geojson);
                                     } else if let Value::List(vec) = v {
-                                        println!(
-                                            "list {:?}",
-                                            vec.iter().map(|v| v).join("!")
-                                        );
+                                        println!("list [{}]", vec.iter().map(|v| v).join(","));
                                     } else if let Value::String(strg) = v {
-                                        println!("string {:?}", strg);
+                                        println!("string {}", strg);
                                     }
 
                                     v.as_string()
